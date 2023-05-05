@@ -131,6 +131,7 @@ fn parse_commands(client: &Client) -> Result<()> {
         if let Err(err) = parse_cmd(input, client) {
             println!("Error:\n{}", err);
         }
+        println!();
     }
 }
 
