@@ -13,6 +13,6 @@ Either run the executable normally as an interactive shell, or start the exe wit
 
 ## Commands
 
-> get **url** _optional_output_path_
+get **url** _optional_output_path_
 
-Downloads specified VOD.
+> Downloads specified VOD.
