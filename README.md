@@ -1,6 +1,6 @@
 # twitch_archiver
 
-A blazingly fast, small, and simple downloader for Twitch VODs.
+A blazingly fast, small, and simple downloader for Twitch VODs (also sub-only).
 Simply pass in a url, and give it an optional output path with an extension of your choosing, which the video will then be converted to.
 
 ## Usage
