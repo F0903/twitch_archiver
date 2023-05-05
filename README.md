@@ -9,7 +9,7 @@ Either run the executable normally as an interactive shell, or start the exe wit
 
 ### Subscriber-only VODs
 
-To download subscriber-only VODs, you need to provide an OAuth token either by setting it through **auth token set** or by passing it to the get command with the --auth switch.
+To download subscriber-only VODs, you need to provide an OAuth token either by setting it through **auth token set** or by passing it to the **get** command with the --auth switch.
 
 To get your OAuth token, open any Twitch VOD, then press F12 to open the dev tools, then go to the Network tab. It should now be recording all network requests to and from Twitch. Then press CTRL+R to reload the page and start from scratch.
 When the page starts loading, wait until the video starts playing. Then press the red button to stop recording, and scroll to the top of the list. Now, scroll down through the list until you find a request called "gql". Open this request, and find the "Authorization" header under "Request Headers", and copy the value except for the "OAuth" part.
