@@ -16,3 +16,4 @@ Either run the executable normally as an interactive shell, or start the exe wit
 get **url** _optional_output_path_
 
 > Downloads specified VOD.
+> Example: get https://www.twitch.tv/videos/1199379108 vod.mp4
