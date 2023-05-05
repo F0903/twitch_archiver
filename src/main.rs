@@ -1,11 +1,16 @@
 mod convert;
+mod settings;
 
 use once_cell::sync::Lazy;
 use regex::Regex;
 use reqwest::blocking::Client;
-use std::{env::args, error::Error, io::stdin, path::Path};
+use std::{
+    env::args,
+    io::{stdin, Write},
+    path::Path,
+};
 
-type Result<T> = std::result::Result<T, Box<dyn Error>>;
+type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 struct Authentication {
     signature: String,
@@ -49,15 +54,28 @@ fn make_string_url_friendly(input: String) -> String {
     strbuf
 }
 
-fn get_auth(vod_id: &str, client: &Client) -> Result<Authentication> {
+fn get_auth(
+    vod_id: &str,
+    optional_override: Option<&str>,
+    client: &Client,
+) -> Result<Authentication> {
+    let settings = settings::get()?;
     let payload = TWITCH_GQL_TOKEN_REQ_PAYLOAD_TEMPLATE.replace("{}", vod_id);
+    let auth_token = match optional_override {
+        Some(x) => "OAuth ".to_owned() + x,
+        None => match settings.auth_token {
+            Some(x) => "OAuth ".to_owned() + &x,
+            _ => "undefined".to_owned(),
+        },
+    };
     let token_req_res = client
         .post(TWITCH_GQL)
+        .header("Authorization", auth_token)
         .header("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko")
-        .header("Host", "gql.twitch.tv")
         .body(payload)
         .send()?;
     token_req_res.error_for_status_ref()?;
+
     let auth_json = token_req_res.json::<serde_json::Value>()?;
     let auth_access = &auth_json["data"]["videoPlaybackAccessToken"];
     let auth_sig = auth_access["signature"]
@@ -86,10 +104,25 @@ fn parse_id_from_url<'a>(url: &'a str) -> Result<&'a str> {
     Ok(id_str)
 }
 
-fn download<'a>(client: &Client, mut args: impl Iterator<Item = &'a str>) -> Result<()> {
+fn download<'a>(client: &Client, args: impl Iterator<Item = &'a str>) -> Result<()> {
+    let mut args = args.peekable();
     let url = args.next().ok_or("No URL or VOD ID provided.")?;
+    let auth = match args.peek() {
+        Some(x) => {
+            if *x == "--auth" {
+                args.next(); // Consume peeked token.
+                Some(
+                    args.next()
+                        .ok_or("Auth switch specified, but no token was provided.")?,
+                )
+            } else {
+                None
+            }
+        }
+        _ => None,
+    };
     let id = parse_id_from_url(url)?;
-    let auth = get_auth(id, &client)?;
+    let auth = get_auth(id, auth, &client)?;
     let req_url = format!(
         "{}{}.m3u8?sig={}&token={}",
         TWITCH_VOD,
@@ -107,6 +140,30 @@ fn download<'a>(client: &Client, mut args: impl Iterator<Item = &'a str>) -> Res
         }
     };
     convert::convert_to_file(&mut result, out_path)?;
+    println!("Success!");
+    Ok(())
+}
+
+fn auth<'a>(mut args: impl Iterator<Item = &'a str>) -> Result<()> {
+    let sub_cmd = args.next().ok_or("No subcommand specified!")?;
+    match sub_cmd {
+        "token" => {
+            let op = args.next().ok_or("No operator specified!")?;
+            match op {
+                "set" => {
+                    let value = args.next().ok_or("No value specified!")?;
+                    settings::set(|x| x.auth_token = Some(value.to_owned()))?;
+                    println!("Successfully set token.");
+                }
+                "get" => {
+                    let settings = settings::get()?;
+                    println!("{:?}", settings.auth_token);
+                }
+                _ => return Err("Unknown operator!".into()),
+            }
+        }
+        _ => return Err("Unknown subcommand!".into()),
+    }
     Ok(())
 }
 
@@ -115,15 +172,17 @@ fn parse_cmd(input: &str, client: &Client) -> Result<()> {
     let cmd_word = words.next().ok_or("No command specified")?;
     match cmd_word {
         "get" => download(client, words),
+        "auth" => auth(words),
         _ => Err(format!("Unknown command. \"{}\"", cmd_word).into()),
     }?;
-    println!("Success!");
     Ok(())
 }
 
 fn parse_commands(client: &Client) -> Result<()> {
     let stdin = stdin();
     loop {
+        print!("> ");
+        std::io::stdout().flush()?;
         let mut stdin_buf = String::default();
         let count = stdin.read_line(&mut stdin_buf)?;
         println!();
