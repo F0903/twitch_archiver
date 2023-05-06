@@ -5,14 +5,11 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  GITHUB_TOKEN: ${{ github.token }}
 
 jobs:
   build:
 
     runs-on: windows-latest
-    permissions:
-      contents: write
 
     steps:
     - uses: actions/checkout@v3
@@ -27,15 +24,7 @@ jobs:
       run: echo "::set-output name=version::$(.\target\release\twitch_archiver.exe version)"
       id: version
     - name: Create release
-      uses: ncipollo/release-action@v1
-      id: create_release
+      uses: softprops/action-gh-release@v1
       with:
-          artifacts: "release.zip"
-          release: ${{ steps.Version.outputs.version }}
-          tag: ${{ steps.Version.outputs.version }}
-    - name: Upload release asset
-      uses: actions/upload-release-asset@v1
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: target/release/twitch_archiver.exe
-        asset_name: twitch_archiver
+        tag_name: ${{ steps.Version.outputs.version }}
+        files: target/release/twitch_archiver.exe
