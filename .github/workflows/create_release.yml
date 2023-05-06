@@ -24,7 +24,7 @@ jobs:
     - name: Build
       run: cargo build --verbose
     - name: Version
-      run: echo "::set-output name=version::$(& '.\target\release\twitch_archiver.exe version')"
+      run: dir && echo "::set-output name=version::$(.\target\release\twitch_archiver.exe version)"
       id: version
     - name: Create release
       uses: ncipollo/release-action@v1
