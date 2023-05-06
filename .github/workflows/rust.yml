@@ -19,7 +19,7 @@ jobs:
     - name: Cache
       uses: actions/cache@v3.2.6
       with:
-        path: deps/
+        path: target/
         key: ${{ runner.os }}-${{ hashFiles('Cargo.lock') }}
     - name: Build
       run: cargo build --verbose --release
