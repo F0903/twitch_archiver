@@ -191,12 +191,10 @@ fn parse_commands(client: &Client) -> Result<()> {
         std::io::stdout().flush()?;
         let mut stdin_buf = String::default();
         let count = stdin.read_line(&mut stdin_buf)?;
-        println!();
         let input = &stdin_buf[..count];
         if let Err(err) = parse_cmd(input, client) {
             println!("Error:\n{}", err);
         }
-        println!();
     }
 }
 
