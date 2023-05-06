@@ -24,14 +24,13 @@ jobs:
     - name: Build
       run: cargo build --verbose
     - name: Version
-      run: echo "::set-output name=version::$(target/release/twitch_archiver.exe version)"
+      run: echo "::set-output name=version::$(.\target\release\twitch_archiver.exe version)"
       id: version
     - name: Create release
       uses: ncipollo/release-action@v1
       id: create_release
       with:
-          artifacts: "release.tar.gz,foo/*.txt"
-          bodyFile: "body.md"
+          artifacts: "release.zip"
           release_name: ${{ steps.Version.outputs.version }}
           tag: ${{ github.ref }}
     - name: Upload release asset
