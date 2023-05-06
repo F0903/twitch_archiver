@@ -20,7 +20,7 @@ jobs:
       uses: actions/cache@v3.2.6
       with:
           path: deps/
-          key: ${{ runner.os }}-${{ hashFiles('.cargo-lock') }}
+          key: ${{ runner.os }}-${{ hashFiles('Cargo.lock') }}
     - name: Build
       run: cargo build --verbose
     - name: Version
