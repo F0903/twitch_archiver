@@ -31,8 +31,8 @@ jobs:
       id: create_release
       with:
           artifacts: "release.zip"
-          release_name: ${{ steps.Version.outputs.version }}
-          tag: ${{ github.ref }}
+          release: ${{ steps.Version.outputs.version }}
+          tag: ${{ steps.Version.outputs.version }}
     - name: Upload release asset
       uses: actions/upload-release-asset@v1
       with:
