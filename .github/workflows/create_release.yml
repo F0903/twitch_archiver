@@ -22,9 +22,9 @@ jobs:
           path: deps/
           key: ${{ runner.os }}-${{ hashFiles('Cargo.lock') }}
     - name: Build
-      run: cargo build --verbose
+      run: cargo build --verbose --release
     - name: Version
-      run: dir target/release && echo "::set-output name=version::$(.\target\release\twitch_archiver.exe version)"
+      run: echo "::set-output name=version::$(.\target\release\twitch_archiver.exe version)"
       id: version
     - name: Create release
       uses: ncipollo/release-action@v1
