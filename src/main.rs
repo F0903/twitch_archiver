@@ -167,12 +167,18 @@ fn auth<'a>(mut args: impl Iterator<Item = &'a str>) -> Result<()> {
     Ok(())
 }
 
+fn version() -> Result<()> {
+    println!("{}", env!("CARGO_PKG_VERSION"));
+    Ok(())
+}
+
 fn parse_cmd(input: &str, client: &Client) -> Result<()> {
     let mut words = input.split_whitespace();
     let cmd_word = words.next().ok_or("No command specified")?;
     match cmd_word {
         "get" => download(client, words),
         "auth" => auth(words),
+        "version" => version(),
         _ => Err(format!("Unknown command. \"{}\"", cmd_word).into()),
     }?;
     Ok(())

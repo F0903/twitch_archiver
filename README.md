@@ -28,3 +28,7 @@ auth token set **auth_token**
 auth token get
 
 > Gets the current auth token.
+
+version
+
+> Gets the current version of the program.
