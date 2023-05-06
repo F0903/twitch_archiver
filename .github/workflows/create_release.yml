@@ -1,4 +1,4 @@
-name: Rust Create Release
+name: Create Release
 
 on:
   workflow_dispatch:
@@ -21,7 +21,7 @@ jobs:
     - name: Run tests
       run: cargo test --verbose
     - name: Version
-      run: echo "::set-output name=version::$(target/release/twitch_archiver.exe version)"
+      run: echo "::set-output name=version::$(./target/release/twitch_archiver.exe version)"
       id: version
     - name: Create release
       uses: ncipollo/release-action@v1
