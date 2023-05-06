@@ -1,0 +1,39 @@
+name: Rust Create Release
+
+on:
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+  GITHUB_TOKEN: ${{ github.token }}
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build
+      run: cargo build --verbose
+    - name: Run tests
+      run: cargo test --verbose
+    - name: Version
+      run: echo "::set-output name=version::$(target/release/twitch_archiver.exe version)"
+      id: version
+    - name: Create release
+      uses: ncipollo/release-action@v1
+      id: create_release
+      with:
+          artifacts: "release.tar.gz,foo/*.txt"
+          bodyFile: "body.md"
+          release_name: ${{ steps.Version.outputs.version }}
+          tag: ${{ github.ref }}
+    - name: Upload release asset
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: target/release/twitch_archiver.exe
+        asset_name: twitch_archiver
