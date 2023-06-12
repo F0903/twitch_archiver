@@ -131,7 +131,11 @@ fn download<'a>(client: &Client, args: impl Iterator<Item = &'a str>) -> Result<
         make_string_url_friendly(auth.auth_value)
     );
     let mut result = client.get(req_url).send()?;
-    result.error_for_status_ref()?;
+
+    if let Err(err) = result.error_for_status_ref() {
+        return Err(format!("Could not download VOD. Try updating the token.\n{}", err).into());
+    }
+
     let out_path = match args.next() {
         Some(x) => Path::new(x),
         None => {
