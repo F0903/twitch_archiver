@@ -136,11 +136,12 @@ fn download<'a>(client: &Client, args: impl Iterator<Item = &'a str>) -> Result<
         return Err(format!("Could not download VOD. Try updating the token.\n{}", err).into());
     }
 
+    let out_filename = format!("{}.mp4", id);
     let out_path = match args.next() {
         Some(x) => Path::new(x),
         None => {
-            println!("No output path provided... Will use default ttv_vod.mp4");
-            Path::new("ttv_vod.mp4")
+            println!("No output path provided... Will use default...");
+            Path::new(&out_filename)
         }
     };
     convert::convert_to_file(&mut result, out_path)?;
