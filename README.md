@@ -1,7 +1,7 @@
 [![Rust Stable](https://github.com/F0903/twitch_archiver/actions/workflows/rust.yml/badge.svg)](https://github.com/F0903/twitch_archiver/actions/workflows/rust.yml)
 # twitch_archiver
 
-A blazingly fast, small, and simple downloader for Twitch VODs (also sub-only).
+A blazingly fast and tiny downloader for Twitch VODs (also sub-only).
 Simply pass in a url, and give it an optional output path with an extension of your choosing, which the video will then be converted to.
 
 ## Usage
