@@ -124,7 +124,7 @@ fn download<'a>(client: &Client, args: impl Iterator<Item = &'a str>) -> Result<
     let id = parse_id_from_url(url)?;
     let auth = get_auth(id, auth, &client)?;
     let req_url = format!(
-        "{}{}.m3u8?sig={}&token={}",
+        "{}{}.m3u8?allow_source=true&sig={}&token={}",
         TWITCH_VOD,
         id,
         auth.signature,
