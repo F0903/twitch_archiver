@@ -20,12 +20,13 @@ struct Authentication {
 const TWITCH_GQL: &str = "https://gql.twitch.tv/gql";
 const TWITCH_GQL_TOKEN_REQ_PAYLOAD_TEMPLATE: &str = r#"{"operationName":"PlaybackAccessToken_Template","query":"query PlaybackAccessToken_Template($login: String!, $isLive: Boolean!, $vodID: ID!, $isVod: Boolean!, $playerType: String!) {  streamPlaybackAccessToken(channelName: $login, params: {platform: \"web\", playerBackend: \"mediaplayer\", playerType: $playerType}) @include(if: $isLive) {    value    signature    __typename  }  videoPlaybackAccessToken(id: $vodID, params: {platform: \"web\", playerBackend: \"mediaplayer\", playerType: $playerType}) @include(if: $isVod) {    value    signature    __typename  }}","variables":{"isLive":false,"login":"","isVod":true,"vodID":"{}","playerType":"site"}}"#;
 const TWITCH_VOD: &str = "https://usher.ttvnw.net/vod/";
+const TWITCH_CLIENT_ID: &str = "kimne78kx3ncx6brgo4mv6wki5h1ko"; // Should probably make user enter this into the program.
 
 const TWITCH_VOD_URL_REGEX: Lazy<Regex> =
     Lazy::new(|| Regex::new(r#"(?:http|https):\/\/(?:www.)?twitch.tv\/videos\/(\d+)"#).unwrap());
 
-fn make_string_url_friendly(input: String) -> String {
-    let mut strbuf = String::with_capacity(input.capacity());
+fn make_string_url_friendly(input: &str) -> String {
+    let mut strbuf = String::with_capacity(input.len());
     for ch in input.chars() {
         match ch {
             '!' => strbuf.push_str("%21"),
@@ -71,7 +72,7 @@ fn get_auth(
     let token_req_res = client
         .post(TWITCH_GQL)
         .header("Authorization", auth_token)
-        .header("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko")
+        .header("Client-ID", TWITCH_CLIENT_ID)
         .body(payload)
         .send()?;
     token_req_res.error_for_status_ref()?;
@@ -128,12 +129,12 @@ fn download<'a>(client: &Client, args: impl Iterator<Item = &'a str>) -> Result<
         TWITCH_VOD,
         id,
         auth.signature,
-        make_string_url_friendly(auth.auth_value)
+        make_string_url_friendly(&auth.auth_value)
     );
     let mut result = client.get(req_url).send()?;
 
     if let Err(err) = result.error_for_status_ref() {
-        return Err(format!("Could not download VOD. Try updating the token.\n{}", err).into());
+        return Err(format!("Could not download VOD. Error:\n{}", err).into());
     }
 
     let out_filename = format!("{}.mp4", id);
@@ -144,8 +145,10 @@ fn download<'a>(client: &Client, args: impl Iterator<Item = &'a str>) -> Result<
             Path::new(&out_filename)
         }
     };
-    convert::convert_to_file(&mut result, out_path)?;
-    println!("Success!");
+    match convert::convert_to_file(&mut result, out_path) {
+        Ok(_) => println!("Success!"),
+        Err(x) => println!("An error occurred:\n{x}"),
+    }
     Ok(())
 }
 
