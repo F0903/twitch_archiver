@@ -8,7 +8,7 @@ type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 pub fn convert_to_file(input: &mut impl Read, out_file: impl AsRef<Path>) -> Result<()> {
     let args = format!(
-        "-loglevel debug -protocol_whitelist http,https,tls,tcp,file,pipe -y -f hls -i pipe:0 {}",
+        "-protocol_whitelist http,https,tls,tcp,file,pipe -y -f hls -i pipe:0 {}",
         out_file.as_ref().display()
     );
     let mut ffmpeg = Command::new("ffmpeg")
