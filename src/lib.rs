@@ -1,3 +1,5 @@
 pub mod convert;
-pub mod twitch;
+mod twitch;
 pub mod util;
+
+pub use twitch::*;
