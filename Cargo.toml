@@ -5,6 +5,7 @@ edition = "2021"
 description = "A small library for downloading Twitch VODs."
 repository = "https://github.com/F0903/twitch_archiver"
 license-file = "LICENSE"
+readme = "README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
