@@ -4,13 +4,22 @@ use std::{
     process::{Command, Stdio},
 };
 
-type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
-
-pub fn convert_to_file(input: &mut impl Read, out_file: impl AsRef<Path>) -> Result<()> {
+/// Converts hls stream to a user specified format by output pathfile extension.
+/// input_args and output_args are passed directly to FFmpeg.
+/// Requires FFmpeg in system PATH or working directory to work.
+pub fn convert_hls_to_file(
+    input: &mut impl Read,
+    out_file: impl AsRef<Path>,
+    input_args: Option<&str>,
+    output_args: Option<&str>,
+) -> Result<(), Box<dyn std::error::Error>> {
     let args = format!(
-        "-protocol_whitelist http,https,tls,tcp,file,pipe -y -f hls -i pipe:0 {}",
+        "-y -loglevel info -protocol_whitelist http,https,tls,tcp,file,pipe -f hls {} -i pipe:0 {} {}",
+        input_args.unwrap_or(""),
+        output_args.unwrap_or(""),
         out_file.as_ref().display()
     );
+    println!("\nConstructed the following FFmpeg args:\n{}\n", args);
     let mut ffmpeg = Command::new("ffmpeg")
         .stdin(Stdio::piped())
         .args(args.split_whitespace())
@@ -26,6 +35,8 @@ pub fn convert_to_file(input: &mut impl Read, out_file: impl AsRef<Path>) -> Res
         input.read_to_string(&mut buf)?;
         // Set all streams to be autoselected and default so it wont be ignored by FFMPEG.
         let buf = buf.replace("AUTOSELECT=NO,DEFAULT=NO", "AUTOSELECT=YES,DEFAULT=YES");
+
+        println!("\nHLS stream manifest:\n{}\n\n", buf);
 
         stdin.write_all(buf.as_bytes())?;
         stdin.flush()?;
