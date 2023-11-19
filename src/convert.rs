@@ -4,6 +4,18 @@ use std::{
     process::{Command, Stdio},
 };
 
+fn remove_spaces(path: impl AsRef<Path>) -> String {
+    let mut buf = path.as_ref().display().to_string();
+    let mut_ptr = unsafe { buf.as_bytes_mut() };
+    for ch in mut_ptr {
+        match ch {
+            b' ' => *ch = b'_',
+            _ => (),
+        }
+    }
+    buf
+}
+
 /// Converts hls stream to a user specified format by output pathfile extension.
 /// input_args and output_args are passed directly to FFmpeg.
 /// Requires FFmpeg in system PATH or working directory to work.
@@ -13,11 +25,12 @@ pub fn convert_hls_to_file(
     input_args: Option<&str>,
     output_args: Option<&str>,
 ) -> Result<(), Box<dyn std::error::Error>> {
+    let out_file = remove_spaces(out_file);
     let args = format!(
         "-y -loglevel info -protocol_whitelist http,https,tls,tcp,file,pipe -f hls {} -i pipe:0 {} {}",
         input_args.unwrap_or(""),
         output_args.unwrap_or(""),
-        out_file.as_ref().display()
+        out_file
     );
     println!("\nConstructed the following FFmpeg args:\n{}\n", args);
     let mut ffmpeg = Command::new("ffmpeg")

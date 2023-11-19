@@ -889,7 +889,7 @@ checksum = "3528ecfd12c466c6f163363caf2d02a71161dd5e1cc6ae7b34207ea2d42d81ed"
 
 [[package]]
 name = "twitch_archiver"
-version = "0.3.1"
+version = "0.3.3"
 dependencies = [
  "once_cell",
  "regex",
